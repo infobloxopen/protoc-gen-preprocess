@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "github.com/atorgayev/protoc-gen-preprocess/options/preprocess.proto";
+import "github.com/infobloxopen/protoc-gen-preprocess/options/preprocess.proto";
 
 message Demo {
    string s = 1 [(preprocess.field).string.trim_space = true ];

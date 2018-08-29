@@ -1,8 +1,8 @@
 package main
 
 import (
-	plugin "github.com/atorgayev/protoc-gen-preprocess/preprocess"
 	"github.com/gogo/protobuf/vanity/command"
+	plugin "github.com/infobloxopen/protoc-gen-preprocess/preprocess"
 )
 
 func main() {

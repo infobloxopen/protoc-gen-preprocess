@@ -7,7 +7,7 @@ import strings "strings"
 import proto "github.com/gogo/protobuf/proto"
 import fmt "fmt"
 import math "math"
-import _ "github.com/atorgayev/protoc-gen-preprocess/options"
+import _ "github.com/infobloxopen/protoc-gen-preprocess/options"
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ = proto.Marshal
