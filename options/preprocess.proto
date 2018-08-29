@@ -1,0 +1,19 @@
+syntax = "proto2";
+package preprocess;
+
+option go_package = "preprocess";
+
+import "google/protobuf/descriptor.proto";
+
+// Field level specifications
+extend google.protobuf.FieldOptions {
+    optional PreprocessFieldOptions field = 11111;
+}
+
+message PreprocessFieldOptions {
+    optional PreprocessString string = 1;
+}
+
+message PreprocessString {
+    optional bool trim_space = 1;
+}
