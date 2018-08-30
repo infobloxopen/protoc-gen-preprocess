@@ -1,13 +1,10 @@
 syntax = "proto3";
 
 import "github.com/infobloxopen/protoc-gen-preprocess/options/preprocess.proto";
+import "google/api/annotations.proto";
 
 message Demo {
    string s = 1 [(preprocess.field).string.trim_space = true ];
-}
-
-message DemoReq {
-    Demo d = 1;
 }
 
 message DemoRes {
@@ -15,6 +12,11 @@ message DemoRes {
 }
 
 service DemoService {
-    rpc Echo(DemoReq) returns (DemoRes){}
+    rpc Echo(Demo) returns (DemoRes){
+        option (google.api.http) = {
+            post: "/v1/demo/echo"
+            body: "*"
+        };
+    }
 }
 

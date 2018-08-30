@@ -1,4 +1,4 @@
-package grpc_preprocessor
+package middleware
 
 import (
 	"context"
