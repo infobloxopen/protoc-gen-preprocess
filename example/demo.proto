@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+import "github.com/infobloxopen/protoc-gen-preprocess/options/preprocess.proto";
+import "google/api/annotations.proto";
+
+message Demo {
+   string preprocessedField = 1 [(preprocess.field).string.trim_space = true ];
+   string untouched = 2;
+}
+
+service DemoService {
+    rpc Echo(Demo) returns (Demo){
+        option (google.api.http) = {
+            post: "/echo"
+            body: "*"
+        };
+    }
+}
+
