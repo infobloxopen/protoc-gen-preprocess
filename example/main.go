@@ -23,7 +23,7 @@ type demoServer struct{}
 
 //Echo implementation of demo service
 func (s demoServer) Echo(ctx context.Context, d *demo.Demo) (*demo.Demo, error) {
-	return &demo.Demo{PreprocessedField: d.GetPreprocessedField(), Untouched: d.GetUntouched()}, nil
+	return d, nil
 }
 
 func runService() {

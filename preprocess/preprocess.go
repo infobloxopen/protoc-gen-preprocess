@@ -64,8 +64,9 @@ func (p *preprocessor) generateProto3Message(file *generator.FileDescriptor, mes
 		}
 		fieldName := p.GetOneOfFieldName(message, field)
 		variableName := "m." + fieldName
+		repeated := field.IsRepeated()
 		if field.IsString() {
-			p.generateStringValidator(variableName, ccTypeName, fieldName, fieldOptions)
+			p.generateStringValidator(variableName, ccTypeName, fieldName, fieldOptions, repeated)
 		}
 	}
 	p.Out()
@@ -74,10 +75,28 @@ func (p *preprocessor) generateProto3Message(file *generator.FileDescriptor, mes
 	p.P()
 }
 
-func (p *preprocessor) generateStringValidator(variableName string, ccTypeName string, fieldName string, fv *prep.PreprocessFieldOptions) {
-	if fv.String_ != nil {
-		if fv.String_.GetTrimSpace() {
-			p.P(variableName, `= `, p.stringsPkg.Use(), `.TrimSpace(`, variableName, `)`)
+func (p *preprocessor) generateStringValidator(variableName string, ccTypeName string, fieldName string, fv *prep.PreprocessFieldOptions, repeated bool) {
+	var str *prep.PreprocessString
+	if repeated {
+		if rep := fv.GetRepeated(); rep != nil {
+			str = rep.GetString_()
+		}
+	} else {
+		str = fv.GetString_()
+	}
+
+	if str != nil {
+		p.P()
+		if str.GetTrimSpace() {
+			if repeated {
+				p.P(`for i, s := range `, variableName, `{`)
+				p.In()
+				p.P(variableName, `[i] = `, p.stringsPkg.Use(), `.TrimSpace(s)`)
+				p.Out()
+				p.P(`}`)
+			} else {
+				p.P(variableName, ` = `, p.stringsPkg.Use(), `.TrimSpace(`, variableName, `)`)
+			}
 		}
 	}
 }

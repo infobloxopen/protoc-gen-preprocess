@@ -16,6 +16,11 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 func (m *Demo) Preprocess() error {
+
 	m.PreprocessedField = strings.TrimSpace(m.PreprocessedField)
+
+	for i, s := range m.PreprocessedRepeatedField {
+		m.PreprocessedRepeatedField[i] = strings.TrimSpace(s)
+	}
 	return nil
 }
