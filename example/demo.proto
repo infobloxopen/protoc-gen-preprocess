@@ -4,17 +4,14 @@ import "github.com/infobloxopen/protoc-gen-preprocess/options/preprocess.proto";
 import "google/api/annotations.proto";
 
 message Demo {
-   string s = 1 [(preprocess.field).string.trim_space = true ];
-}
-
-message DemoRes {
-    string res = 1;
+   string preprocessedField = 1 [(preprocess.field).string.trim_space = true ];
+   string untouched = 2;
 }
 
 service DemoService {
-    rpc Echo(Demo) returns (DemoRes){
+    rpc Echo(Demo) returns (Demo){
         option (google.api.http) = {
-            post: "/v1/demo/echo"
+            post: "/echo"
             body: "*"
         };
     }

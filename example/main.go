@@ -21,8 +21,9 @@ const (
 
 type demoServer struct{}
 
-func (s demoServer) Echo(ctx context.Context, d *demo.Demo) (*demo.DemoRes, error) {
-	return &demo.DemoRes{Res: d.GetS()}, nil
+//Echo implementation of demo service
+func (s demoServer) Echo(ctx context.Context, d *demo.Demo) (*demo.Demo, error) {
+	return &demo.Demo{PreprocessedField: d.GetPreprocessedField(), Untouched: d.GetUntouched()}, nil
 }
 
 func runService() {

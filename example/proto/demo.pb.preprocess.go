@@ -16,10 +16,6 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 func (m *Demo) Preprocess() error {
-	m.S = strings.TrimSpace(m.S)
-	return nil
-}
-
-func (m *DemoRes) Preprocess() error {
+	m.PreprocessedField = strings.TrimSpace(m.PreprocessedField)
 	return nil
 }
