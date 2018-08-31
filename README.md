@@ -1,10 +1,12 @@
 # protoc-gen-preprocess
 
-### Purpose
-We have variety of validators for protobuf, however sometimes we need to pre-process incoming data. This protobuf plugin helps to generate preprocessing methods for incoming messages. 
+## Purpose
+
+We have variety of validators for protobuf, however sometimes we need to pre-process incoming data. This protobuf plugin helps to generate preprocessing methods for incoming messages.
 
 ### Example
-```
+
+```proto
 syntax = "proto3";
 
 import "github.com/infobloxopen/protoc-gen-preprocess/options/preprocess.proto";
@@ -14,8 +16,10 @@ message Demo {
    string untouched = 2;
 }
 ```
+
 will generate:
-```
+
+```go
 import proto "github.com/gogo/protobuf/proto"
 import fmt "fmt"
 import math "math"
@@ -27,18 +31,19 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 func (m *Demo) Preprocess() error {
-	m.PreprocessedField = strings.TrimSpace(m.PreprocessedField)
-	return nil
+    m.PreprocessedField = strings.TrimSpace(m.PreprocessedField)
+    return nil
 }
 ```
 
 ## Usage
+
 It is best to use this plugin as a middleware as shown in example application:
 
-```
+```go
 package main
 
-import 	(
+import (
 ...
     grpc_preprocessor "github.com/infobloxopen/protoc-gen-preprocess/middleware"
 ...
@@ -47,11 +52,11 @@ import 	(
 func runService() {
 ...
 // Middleware chain.
-	interceptors := []grpc.UnaryServerInterceptor{
+    interceptors := []grpc.UnaryServerInterceptor{
 ...
-		grpc_preprocessor.UnaryServerInterceptor(), // preprocessing middleware
+        grpc_preprocessor.UnaryServerInterceptor(), // preprocessing middleware
 ...
-	}
+    }
     server := grpc.NewServer(grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(interceptors...)))
 ...
 }
@@ -60,7 +65,7 @@ func runService() {
 
 ### Installation
 
-```
+```sh
 # get repo
 go get -d github.com/infobloxopen/protoc-gen-preprocess
 
@@ -71,7 +76,7 @@ make install
 
 ### Running Demo
 
-```
+```sh
 # build demo
 make demo
 
@@ -80,11 +85,14 @@ go run example/main.go
 ```
 
 This will launch a server with our demo service. To check functionality of demo application send following request:
-```
+
+```sh
 curl -X POST -i http://localhost:8080/echo --data '{"preprocessedField": "     Those spaces will be trimmed    ","untouched": " Notice how those spaces will be left as is    "}'
 ```
 
 ## Supported Field Types
+
 For now following list of fields supported:
+
 * **String**:
-    *  **trim_spaces** - Will trim leading and following spaces
+  * **trim_spaces** - Will trim leading and following spaces
