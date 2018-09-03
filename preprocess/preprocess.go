@@ -70,6 +70,7 @@ func (p *preprocessor) generateProto3Message(file *generator.FileDescriptor, mes
 		}
 	}
 	p.Out()
+	p.P()
 	p.P(`return nil`)
 	p.P(`}`)
 	p.P()

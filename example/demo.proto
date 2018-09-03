@@ -7,6 +7,7 @@ message Demo {
    string preprocessedField = 1 [(preprocess.field).string.trim_space = true ];
    repeated string preprocessedRepeatedField = 2 [(preprocess.field).string.trim_space = true ];
    string untouched = 3;
+   int32 ignored = 4  [(preprocess.field).string.trim_space = true ];
 }
 
 service DemoService {
