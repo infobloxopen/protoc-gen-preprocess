@@ -76,14 +76,7 @@ func (p *preprocessor) generateProto3Message(file *generator.FileDescriptor, mes
 }
 
 func (p *preprocessor) generateStringValidator(variableName string, ccTypeName string, fieldName string, fv *prep.PreprocessFieldOptions, repeated bool) {
-	var str *prep.PreprocessString
-	if repeated {
-		if rep := fv.GetRepeated(); rep != nil {
-			str = rep.GetString_()
-		}
-	} else {
-		str = fv.GetString_()
-	}
+	str := fv.GetString_()
 
 	if str != nil {
 		p.P()

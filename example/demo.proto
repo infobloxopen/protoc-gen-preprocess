@@ -5,7 +5,7 @@ import "google/api/annotations.proto";
 
 message Demo {
    string preprocessedField = 1 [(preprocess.field).string.trim_space = true ];
-   repeated string preprocessedRepeatedField = 2 [(preprocess.field).repeated.string.trim_space = true ];
+   repeated string preprocessedRepeatedField = 2 [(preprocess.field).string.trim_space = true ];
    string untouched = 3;
 }
 

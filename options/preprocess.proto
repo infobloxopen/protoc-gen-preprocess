@@ -11,12 +11,7 @@ extend google.protobuf.FieldOptions {
 }
 
 message PreprocessFieldOptions {
-    PreprocessRepeated repeated = 1;
     PreprocessString string = 2;
-}
-
-message PreprocessRepeated {
-    PreprocessString string = 1;
 }
 
 message PreprocessString {

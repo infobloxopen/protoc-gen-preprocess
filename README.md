@@ -95,4 +95,4 @@ curl -X POST -i http://localhost:8080/echo --data '{"preprocessedField": "     T
 For now following list of fields supported:
 
 * **String**:
-  * **trim_spaces** - Will trim leading and following spaces
+  * **trim_space** - Will trim leading and following spaces
