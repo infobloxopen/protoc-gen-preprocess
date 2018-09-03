@@ -13,8 +13,10 @@ import "github.com/infobloxopen/protoc-gen-preprocess/options/preprocess.proto";
 
 message Demo {
    string preprocessedField = 1 [(preprocess.field).string.trim_space = true ];
-   string untouched = 2;
+   repeated string preprocessedRepeatedField = 2 [(preprocess.field).string.trim_space = true ];
+   string untouched = 3;
 }
+
 ```
 
 will generate:
@@ -31,9 +33,15 @@ var _ = fmt.Errorf
 var _ = math.Inf
 
 func (m *Demo) Preprocess() error {
+
     m.PreprocessedField = strings.TrimSpace(m.PreprocessedField)
+
+    for i, s := range m.PreprocessedRepeatedField {
+        m.PreprocessedRepeatedField[i] = strings.TrimSpace(s)
+    }
     return nil
 }
+
 ```
 
 ## Usage
@@ -95,4 +103,4 @@ curl -X POST -i http://localhost:8080/echo --data '{"preprocessedField": "     T
 For now following list of fields supported:
 
 * **String**:
-  * **trim_spaces** - Will trim leading and following spaces
+  * **trim_space** - Will trim leading and following spaces

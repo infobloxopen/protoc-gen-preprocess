@@ -11,7 +11,7 @@ extend google.protobuf.FieldOptions {
 }
 
 message PreprocessFieldOptions {
-    PreprocessString string = 1;
+    PreprocessString string = 2;
 }
 
 message PreprocessString {
