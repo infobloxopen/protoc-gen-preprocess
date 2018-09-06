@@ -10,7 +10,8 @@ import (
 type preprocessor struct {
 	*generator.Generator
 	generator.PluginImports
-	stringsPkg generator.Single
+	packageName string
+	stringsPkg  generator.Single
 }
 
 func NewPreprocessor() *preprocessor {
@@ -30,7 +31,9 @@ func (p *preprocessor) Generate(file *generator.FileDescriptor) {
 	p.PluginImports = generator.NewPluginImports(p.Generator)
 	p.stringsPkg = p.NewImport("strings")
 	for _, message := range file.Messages() {
-		p.generateProto3Message(file, message)
+		if containsPreprocessOptions(message) {
+			p.generateProto3Message(message)
+		}
 	}
 }
 
@@ -53,7 +56,7 @@ func getFieldOptions(field *descriptor.FieldDescriptorProto) *prep.PreprocessFie
 	return opts
 }
 
-func (p *preprocessor) generateProto3Message(file *generator.FileDescriptor, message *generator.Descriptor) {
+func (p *preprocessor) generateProto3Message(message *generator.Descriptor) {
 	ccTypeName := generator.CamelCaseSlice(message.TypeName())
 	p.P(`func (m *`, ccTypeName, `) Preprocess() error {`)
 	p.In()
@@ -93,4 +96,14 @@ func (p *preprocessor) generateStringValidator(variableName string, ccTypeName s
 			}
 		}
 	}
+}
+
+func containsPreprocessOptions(message *generator.Descriptor) bool {
+	for _, field := range message.Field {
+		fieldOptions := getFieldOptions(field)
+		if fieldOptions != nil {
+			return true
+		}
+	}
+	return false
 }

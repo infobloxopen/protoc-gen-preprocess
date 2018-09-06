@@ -6,13 +6,13 @@ We have variety of validators for protobuf, however sometimes we need to pre-pro
 
 ### Example
 
-```proto
+```protobuf
 syntax = "proto3";
 
 import "github.com/infobloxopen/protoc-gen-preprocess/options/preprocess.proto";
 
 message Demo {
-   string preprocessedField = 1 [(preprocess.field).string.trim_space = true ];
+   string preprocessedField = 1 [(preprocess.field).string.trim_space = true];
    repeated string preprocessedRepeatedField = 2 [(preprocess.field).string.trim_space = true ];
    string untouched = 3;
 }
@@ -74,12 +74,8 @@ func runService() {
 ### Installation
 
 ```sh
-# get repo
-go get -d github.com/infobloxopen/protoc-gen-preprocess
-
-# build
-make install
-
+# get repo and install
+go get github.com/infobloxopen/protoc-gen-preprocess
 ```
 
 ### Running Demo
