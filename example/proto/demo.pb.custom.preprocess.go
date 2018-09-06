@@ -1,7 +1,7 @@
 package proto
 
-// CustomPreprocess will be called instead of generated methods
-func (m *Custom) CustomPreprocess() error {
+// Preprocess will be called by interceptor
+func (m *Custom) Preprocess() error {
 	m.DoItYourself = "Changed Internals"
 	return nil
 }
