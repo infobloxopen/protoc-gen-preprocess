@@ -71,8 +71,6 @@ func runService() {
 
 ```
 
-Also it is possible to specify `CustomPrepprocessor`s and implement your own preprocessing for each message.
-
 ### Installation
 
 ```sh

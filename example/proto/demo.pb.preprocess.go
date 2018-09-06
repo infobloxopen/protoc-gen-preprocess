@@ -15,29 +15,12 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
-type CustomPreprocessor interface {
-	CustomPreprocess() error
-}
-
 func (m *Demo) Preprocess() error {
-
-	if v, ok := interface{}(m).(CustomPreprocessor); ok {
-		return v.CustomPreprocess()
-	}
 
 	m.PreprocessedField = strings.TrimSpace(m.PreprocessedField)
 
 	for i, s := range m.PreprocessedRepeatedField {
 		m.PreprocessedRepeatedField[i] = strings.TrimSpace(s)
-	}
-
-	return nil
-}
-
-func (m *Custom) Preprocess() error {
-
-	if v, ok := interface{}(m).(CustomPreprocessor); ok {
-		return v.CustomPreprocess()
 	}
 
 	return nil
