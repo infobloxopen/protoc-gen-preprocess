@@ -76,12 +76,8 @@ Also it is possible to specify `CustomPrepprocessor`s and implement your own pre
 ### Installation
 
 ```sh
-# get repo
+# get repo and install
 go get github.com/infobloxopen/protoc-gen-preprocess
-
-# build
-make install
-
 ```
 
 ### Running Demo
