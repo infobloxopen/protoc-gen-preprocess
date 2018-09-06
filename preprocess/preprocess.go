@@ -10,7 +10,8 @@ import (
 type preprocessor struct {
 	*generator.Generator
 	generator.PluginImports
-	stringsPkg generator.Single
+	packageName string
+	stringsPkg  generator.Single
 }
 
 func NewPreprocessor() *preprocessor {
@@ -29,6 +30,7 @@ func (p *preprocessor) Init(g *generator.Generator) {
 func (p *preprocessor) Generate(file *generator.FileDescriptor) {
 	p.PluginImports = generator.NewPluginImports(p.Generator)
 	p.stringsPkg = p.NewImport("strings")
+	p.customInterface()
 	for _, message := range file.Messages() {
 		p.generateProto3Message(file, message)
 	}
@@ -57,6 +59,7 @@ func (p *preprocessor) generateProto3Message(file *generator.FileDescriptor, mes
 	ccTypeName := generator.CamelCaseSlice(message.TypeName())
 	p.P(`func (m *`, ccTypeName, `) Preprocess() error {`)
 	p.In()
+	p.customCall()
 	for _, field := range message.Field {
 		fieldOptions := getFieldOptions(field)
 		if fieldOptions == nil && !field.IsMessage() {
@@ -93,4 +96,20 @@ func (p *preprocessor) generateStringValidator(variableName string, ccTypeName s
 			}
 		}
 	}
+}
+
+func (p *preprocessor) customInterface() {
+	p.P()
+	p.P(`type CustomPreprocessor interface{`)
+	p.In()
+	p.P(`CustomPreprocess() error`)
+	p.Out()
+	p.P(`  }`)
+	p.P()
+}
+
+func (p *preprocessor) customCall() {
+	p.P()
+	p.P(`if v, ok := interface{}(m).(CustomPreprocessor); ok { return v.CustomPreprocess() }`)
+	p.P()
 }

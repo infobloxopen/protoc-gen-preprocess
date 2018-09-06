@@ -71,11 +71,13 @@ func runService() {
 
 ```
 
+Also it is possible to specify `CustomPrepprocessor`s and implement your own preprocessing for each message.
+
 ### Installation
 
 ```sh
 # get repo
-go get -d github.com/infobloxopen/protoc-gen-preprocess
+go get github.com/infobloxopen/protoc-gen-preprocess
 
 # build
 make install

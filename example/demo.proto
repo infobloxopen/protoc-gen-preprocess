@@ -1,5 +1,5 @@
 syntax = "proto3";
-
+package proto;
 import "github.com/infobloxopen/protoc-gen-preprocess/options/preprocess.proto";
 import "google/api/annotations.proto";
 
@@ -8,6 +8,10 @@ message Demo {
    repeated string preprocessedRepeatedField = 2 [(preprocess.field).string.trim_space = true ];
    string untouched = 3;
    int32 ignored = 4  [(preprocess.field).string.trim_space = true ];
+}
+
+message Custom {
+    string doItYourself = 1;
 }
 
 service DemoService {
