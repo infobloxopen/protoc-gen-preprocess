@@ -15,5 +15,11 @@ message PreprocessFieldOptions {
 }
 
 message PreprocessString {
-    bool trim_space = 1;
+    enum Methods {
+        none = 0;
+        trim_space = 1;
+        upper = 2;
+        lower = 3;
+    }
+    repeated Methods methods = 1;
 }
