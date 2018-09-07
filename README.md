@@ -32,7 +32,7 @@ import _ "github.com/infobloxopen/protoc-gen-preprocess/options"
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
-nc (m *Demo) Preprocess() error {
+func (m *Demo) Preprocess() error {
 
     m.PreprocessedField = strings.TrimSpace(m.PreprocessedField)
     m.PreprocessedField = strings.ToLower(m.PreprocessedField)
@@ -78,11 +78,7 @@ func runService() {
 
 ```sh
 # get repo
-go get -d github.com/infobloxopen/protoc-gen-preprocess
-
-# build
-make install
-
+go get github.com/infobloxopen/protoc-gen-preprocess
 ```
 
 ### Running Demo
