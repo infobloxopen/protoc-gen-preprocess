@@ -10,6 +10,10 @@ message Demo {
    int32 ignored = 4 [(preprocess.field).string = {methods:[trim_space,lower]}];
 }
 
+message Custom {
+    string doItYourself = 1;
+}
+
 service DemoService {
     rpc Echo(Demo) returns (Demo){
         option (google.api.http) = {

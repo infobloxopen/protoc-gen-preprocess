@@ -77,7 +77,7 @@ func runService() {
 ### Installation
 
 ```sh
-# get repo
+# get repo and install
 go get github.com/infobloxopen/protoc-gen-preprocess
 ```
 
