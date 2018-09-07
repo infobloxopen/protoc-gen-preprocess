@@ -12,9 +12,10 @@ syntax = "proto3";
 import "github.com/infobloxopen/protoc-gen-preprocess/options/preprocess.proto";
 
 message Demo {
-   string preprocessedField = 1 [(preprocess.field).string.trim_space = true];
-   repeated string preprocessedRepeatedField = 2 [(preprocess.field).string.trim_space = true ];
+   string preprocessedField = 1 [(preprocess.field).string = {methods:[trim_space,lower]}];
+   repeated string preprocessedRepeatedField = 2 [(preprocess.field).string = {methods:[trim_space,upper]}];
    string untouched = 3;
+   int32 ignored = 4 [(preprocess.field).string = {methods:[trim_space,lower]}];
 }
 
 ```
@@ -31,14 +32,16 @@ import _ "github.com/infobloxopen/protoc-gen-preprocess/options"
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
-
 func (m *Demo) Preprocess() error {
 
     m.PreprocessedField = strings.TrimSpace(m.PreprocessedField)
+    m.PreprocessedField = strings.ToLower(m.PreprocessedField)
 
     for i, s := range m.PreprocessedRepeatedField {
         m.PreprocessedRepeatedField[i] = strings.TrimSpace(s)
+        m.PreprocessedRepeatedField[i] = strings.ToUpper(s)
     }
+
     return nil
 }
 
@@ -100,3 +103,5 @@ For now following list of fields supported:
 
 * **String**:
   * **trim_space** - Will trim leading and following spaces
+  * **upper** - Will convert to upper
+  * **lower** - Will convert to lower
