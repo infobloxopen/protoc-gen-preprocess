@@ -12,10 +12,16 @@ syntax = "proto3";
 import "github.com/infobloxopen/protoc-gen-preprocess/options/preprocess.proto";
 
 message Demo {
-   string preprocessedField = 1 [(preprocess.field).string = {methods:[trim_space,lower]}];
-   repeated string preprocessedRepeatedField = 2 [(preprocess.field).string = {methods:[trim_space,upper]}];
-   string untouched = 3;
-   int32 ignored = 4 [(preprocess.field).string = {methods:[trim_space,lower]}];
+    // Options specified at message level are applied for each field (in this case of type string)
+    option (preprocess.each).string = {
+        methods: [trim_space]
+    };
+    // Also it is possible to specify additional method on field level
+    string preprocessedField = 1 [(preprocess.field).string.methods = lower];
+    // Preprocessor automatically checks if field is repeated and generates methods accordingly
+    repeated string preprocessedRepeatedField = 2 [(preprocess.field).string.methods = upper];
+    // If a field does not fit preprocess method, it is just ignored
+    int32 ignored = 4 [(preprocess.field).string = {methods:[trim_space,lower]}];
 }
 
 ```
@@ -32,10 +38,11 @@ import _ "github.com/infobloxopen/protoc-gen-preprocess/options"
 var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
+
 func (m *Demo) Preprocess() error {
 
-    m.PreprocessedField = strings.TrimSpace(m.PreprocessedField)
     m.PreprocessedField = strings.ToLower(m.PreprocessedField)
+    m.PreprocessedField = strings.TrimSpace(m.PreprocessedField)
 
     for i, s := range m.PreprocessedRepeatedField {
         m.PreprocessedRepeatedField[i] = strings.TrimSpace(s)

@@ -4,12 +4,19 @@ import "github.com/infobloxopen/protoc-gen-preprocess/options/preprocess.proto";
 import "google/api/annotations.proto";
 
 message Demo {
-   string preprocessedField = 1 [(preprocess.field).string = {methods:[trim_space,lower]}];
-   repeated string preprocessedRepeatedField = 2 [(preprocess.field).string = {methods:[trim_space,upper]}];
-   string untouched = 3;
-   int32 ignored = 4 [(preprocess.field).string = {methods:[trim_space,lower]}];
+    // Options specified at message level are applied for each field (in this case of type string)
+    option (preprocess.each).string = {
+        methods: [trim_space]
+    };
+    // Also it is possible to specify additional method on field level
+    string preprocessedField = 1 [(preprocess.field).string.methods = lower];
+    // Preprocessor automatically checks if field is repeated and generates methods accordingly
+    repeated string preprocessedRepeatedField = 2 [(preprocess.field).string.methods = upper];
+    // If a field does not fit preprocess method, it is just ignored
+    int32 ignored = 4 [(preprocess.field).string = {methods:[trim_space,lower]}];
 }
 
+// This message left as is to show that we can provide our own preprocessors
 message Custom {
     string doItYourself = 1;
 }
