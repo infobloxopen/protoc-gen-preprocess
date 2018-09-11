@@ -31,7 +31,7 @@ gentool:
 	@docker image prune -f --filter label=stage=server-intermediate
 
 gentool-example:
-	docker run --rm -v $(CUR_DIR):$(SRCROOT) infoblox/atlas-gentool:dev-preprocess \
+	docker run --rm -v $(CUR_DIR):$(SRCROOT) $(GENPREP_IMAGE):$(IMAGE_VERSION) \
 		--preprocess_out=$(SRCROOT) \
 		--go_out=plugins=grpc:$(SRCROOT) \
 		--grpc-gateway_out=$(SRCROOT) \

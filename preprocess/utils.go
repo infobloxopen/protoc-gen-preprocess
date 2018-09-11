@@ -8,9 +8,9 @@ import (
 )
 
 var stringMethods = map[prep.PreprocessString_Methods]string{
-	prep.PreprocessString_trim_space: ".TrimSpace",
-	prep.PreprocessString_upper:      ".ToUpper",
-	prep.PreprocessString_lower:      ".ToLower",
+	prep.PreprocessString_trim:  ".TrimSpace",
+	prep.PreprocessString_upper: ".ToUpper",
+	prep.PreprocessString_lower: ".ToLower",
 }
 
 type prepOptions interface {
