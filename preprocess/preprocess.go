@@ -46,7 +46,7 @@ func (p *preprocessor) generateProto3Message(message *generator.Descriptor, mess
 	p.In()
 	for _, field := range message.Field {
 		fieldOptions := getFieldOptions(field)
-		if fieldOptions == nil && !field.IsMessage() {
+		if fieldOptions == nil && !field.IsMessage() && messageOptions == nil {
 			continue
 		}
 		fieldName := p.GetOneOfFieldName(message, field)
@@ -69,6 +69,9 @@ func (p *preprocessor) generateStringPreprocessor(variableName string, opts []pr
 		if str := v.GetString_(); str != nil {
 			for _, m := range str.Methods {
 				strMethods[m.String()] = m
+			}
+			if str.GetTrimSpace() {
+				strMethods["trim_space"] = prep.PreprocessString_trim
 			}
 		}
 	}

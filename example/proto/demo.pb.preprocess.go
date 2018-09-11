@@ -17,13 +17,20 @@ var _ = math.Inf
 
 func (m *Demo) Preprocess() error {
 
-	m.PreprocessedField = strings.ToLower(m.PreprocessedField)
 	m.PreprocessedField = strings.TrimSpace(m.PreprocessedField)
+	m.PreprocessedField = strings.ToLower(m.PreprocessedField)
 
 	for i, s := range m.PreprocessedRepeatedField {
 		m.PreprocessedRepeatedField[i] = strings.TrimSpace(s)
 		m.PreprocessedRepeatedField[i] = strings.ToUpper(s)
 	}
+
+	return nil
+}
+
+func (m *BackwardCompatible) Preprocess() error {
+
+	m.Compatible = strings.TrimSpace(m.Compatible)
 
 	return nil
 }
