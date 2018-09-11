@@ -1,11 +1,15 @@
 
-IMAGE_REGISTRY ?= infoblox
-DOCKERFILE_PATH := $(CURDIR)/docker
-IMAGE_VERSION  ?= dev-preprocess
-GENGORM_IMAGE      := $(IMAGE_REGISTRY)/atlas-gentool
-GENGORM_DOCKERFILE := $(DOCKERFILE_PATH)/Dockerfile
+CUR_DIR 			:= $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
+REPO 				:= github.com/infobloxopen/protoc-gen-preprocess
+SRCROOT 			:= /go/src/$(REPO)
+IMAGE_REGISTRY 		?= infoblox
+DOCKERFILE_PATH 	:= $(CURDIR)/docker
+DOCKERPATH          := /go/src
+IMAGE_VERSION  		?= dev-preprocess
+GENPREP_IMAGE      	:= $(IMAGE_REGISTRY)/atlas-gentool
+GENPREP_DOCKERFILE 	:= $(DOCKERFILE_PATH)/Dockerfile
 
-.PHONY: options install demo gentool
+.PHONY: options install demo
 
 default: options install demo 
 
@@ -23,13 +27,12 @@ demo: options install
 	demo.proto
 
 gentool:
-	@docker build -f $(GENGORM_DOCKERFILE) -t $(GENGORM_IMAGE):$(IMAGE_VERSION) .
-	@docker tag $(GENGORM_IMAGE):$(IMAGE_VERSION) $(GENGORM_IMAGE):latest
+	@docker build -f $(GENPREP_DOCKERFILE) -t $(GENPREP_IMAGE):$(IMAGE_VERSION) .
 	@docker image prune -f --filter label=stage=server-intermediate
 
 gentool-example: gentool
-	docker run --rm infoblox/atlas-gentool:dev-preprocess \
-		-preprocess_out=./example/proto/ \
-		--go_out=plugins=grpc:./example/proto/ \
-		--grpc-gateway_out=./example/proto/ \
-		demo.proto
+	docker run --rm -v $(CUR_DIR):$(SRCROOT) $(GENPREP_IMAGE):$(IMAGE_VERSION) \
+		--preprocess_out=$(DOCKERPATH) \
+		--go_out=plugins=grpc:$(DOCKERPATH) \
+		--grpc-gateway_out=$(DOCKERPATH) \
+		$(SRCROOT)/example/demo.proto
