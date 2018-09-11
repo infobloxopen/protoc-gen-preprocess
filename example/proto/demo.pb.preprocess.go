@@ -22,7 +22,6 @@ func (m *Demo) Preprocess() error {
 
 	for i, s := range m.PreprocessedRepeatedField {
 		m.PreprocessedRepeatedField[i] = strings.TrimSpace(s)
-		m.PreprocessedRepeatedField[i] = strings.ToUpper(s)
 	}
 
 	return nil

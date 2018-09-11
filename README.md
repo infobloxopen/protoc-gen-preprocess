@@ -14,14 +14,14 @@ import "github.com/infobloxopen/protoc-gen-preprocess/options/preprocess.proto";
 message Demo {
     // Options specified at message level are applied for each field (in this case of type string)
     option (preprocess.each).string = {
-        methods: [trim_space]
+        methods: [trim]
     };
     // Also it is possible to specify additional method on field level
     string preprocessedField = 1 [(preprocess.field).string.methods = lower];
     // Preprocessor automatically checks if field is repeated and generates methods accordingly
-    repeated string preprocessedRepeatedField = 2 [(preprocess.field).string.methods = upper];
+    repeated string preprocessedRepeatedField = 2;
     // If a field does not fit preprocess method, it is just ignored
-    int32 ignored = 4 [(preprocess.field).string = {methods:[trim_space,lower]}];
+    int32 ignored = 3 [(preprocess.field).string = {methods:[lower]}];
 }
 
 ```
@@ -41,12 +41,11 @@ var _ = math.Inf
 
 func (m *Demo) Preprocess() error {
 
-    m.PreprocessedField = strings.ToLower(m.PreprocessedField)
     m.PreprocessedField = strings.TrimSpace(m.PreprocessedField)
+    m.PreprocessedField = strings.ToLower(m.PreprocessedField)
 
     for i, s := range m.PreprocessedRepeatedField {
         m.PreprocessedRepeatedField[i] = strings.TrimSpace(s)
-        m.PreprocessedRepeatedField[i] = strings.ToUpper(s)
     }
 
     return nil

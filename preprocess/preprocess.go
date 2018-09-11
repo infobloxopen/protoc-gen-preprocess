@@ -71,7 +71,8 @@ func (p *preprocessor) generateStringPreprocessor(variableName string, opts []pr
 				strMethods[m.String()] = m
 			}
 			if str.GetTrimSpace() {
-				strMethods["trim_space"] = prep.PreprocessString_trim
+				m := prep.PreprocessString_trim
+				strMethods[m.String()] = m
 			}
 		}
 	}

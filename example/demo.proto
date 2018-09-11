@@ -11,9 +11,9 @@ message Demo {
     // Also it is possible to specify additional method on field level
     string preprocessedField = 1 [(preprocess.field).string.methods = lower];
     // Preprocessor automatically checks if field is repeated and generates methods accordingly
-    repeated string preprocessedRepeatedField = 2 [(preprocess.field).string.methods = upper];
+    repeated string preprocessedRepeatedField = 2;
     // If a field does not fit preprocess method, it is just ignored
-    int32 ignored = 4 [(preprocess.field).string = {methods:[trim,lower]}];
+    int32 ignored = 3 [(preprocess.field).string = {methods:[lower]}];
 }
 
 // This message left as is to show that we can provide our own preprocessors
