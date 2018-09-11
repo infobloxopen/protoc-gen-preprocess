@@ -70,10 +70,6 @@ func (p *preprocessor) generateStringPreprocessor(variableName string, opts []pr
 			for _, m := range str.Methods {
 				strMethods[m.String()] = m
 			}
-			if str.GetTrimSpace() {
-				m := prep.PreprocessString_trim
-				strMethods[m.String()] = m
-			}
 		}
 	}
 	if repeated {

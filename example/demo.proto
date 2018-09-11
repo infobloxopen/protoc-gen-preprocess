@@ -21,10 +21,6 @@ message Custom {
     string doItYourself = 1;
 }
 
-message BackwardCompatible {
-    string compatible = 1  [(preprocess.field).string.trim_space = true];
-}
-
 service DemoService {
     rpc Echo(Demo) returns (Demo){
         option (google.api.http) = {

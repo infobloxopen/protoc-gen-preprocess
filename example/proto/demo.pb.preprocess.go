@@ -26,10 +26,3 @@ func (m *Demo) Preprocess() error {
 
 	return nil
 }
-
-func (m *BackwardCompatible) Preprocess() error {
-
-	m.Compatible = strings.TrimSpace(m.Compatible)
-
-	return nil
-}

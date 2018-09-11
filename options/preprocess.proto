@@ -30,6 +30,5 @@ message PreprocessString {
         upper = 2;
         lower = 3;
     }
-    bool trim_space = 1;
-    repeated Methods methods = 2;
+    repeated Methods methods = 1;
 }
