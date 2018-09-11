@@ -20,19 +20,20 @@ options:
 	protoc -I /usr/local/include/ -I. --gogo_out="Mgoogle/protobuf/descriptor.proto=github.com/gogo/protobuf/protoc-gen-gogo/descriptor:." options/preprocess.proto  
 
 demo: options install
-	protoc -I$(GOPATH)/src -Iexample -I/usr/local/include -I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-	--preprocess_out=./example/proto/ \
-	--go_out=plugins=grpc:./example/proto/ \
-	--grpc-gateway_out=./example/proto/ \
+	protoc -Iexample/proto -I$(GOPATH)/src -I/usr/local/include -I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+	--preprocess_out=./example/proto \
+	--go_out=plugins=grpc:./example/proto \
+	--grpc-gateway_out=./example/proto \
 	demo.proto
 
 gentool:
 	@docker build -f $(GENPREP_DOCKERFILE) -t $(GENPREP_IMAGE):$(IMAGE_VERSION) .
 	@docker image prune -f --filter label=stage=server-intermediate
 
-gentool-example: gentool
-	docker run --rm -v $(CUR_DIR):$(SRCROOT) $(GENPREP_IMAGE):$(IMAGE_VERSION) \
-		--preprocess_out=$(DOCKERPATH) \
-		--go_out=plugins=grpc:$(DOCKERPATH) \
-		--grpc-gateway_out=$(DOCKERPATH) \
-		$(SRCROOT)/example/demo.proto
+gentool-example:
+	docker run --rm -v $(CUR_DIR):$(SRCROOT) infoblox/atlas-gentool:dev-preprocess \
+		--preprocess_out=$(SRCROOT) \
+		--go_out=plugins=grpc:$(SRCROOT) \
+		--grpc-gateway_out=$(SRCROOT) \
+		example/proto/demo.proto
+		
