@@ -46,7 +46,7 @@ func (p *preprocessor) generateProto3Message(message *generator.Descriptor, mess
 	p.In()
 	for _, field := range message.Field {
 		fieldOptions := getFieldOptions(field)
-		if fieldOptions == nil && !field.IsMessage() {
+		if fieldOptions == nil && !field.IsMessage() && messageOptions == nil {
 			continue
 		}
 		fieldName := p.GetOneOfFieldName(message, field)
