@@ -28,6 +28,9 @@ func containsFieldPreprocessOptions(message *generator.Descriptor) bool {
 }
 
 func getMessageOptions(message *generator.Descriptor) *prep.PreprocessMessageOptions {
+	if message.Options == nil {
+		return nil
+	}
 	v, err := proto.GetExtension(message.Options, prep.E_Each)
 	if err != nil {
 		return nil
