@@ -14,6 +14,30 @@ message Demo {
     repeated string preprocessedRepeatedField = 2;
     // If a field does not fit preprocess method, it is just ignored
     int32 ignored = 3 [(preprocess.field).string = {methods:[lower]}];
+
+    message Internal {
+        option (preprocess.each).string = {
+            methods: [trim]
+        };
+
+        string internal_string = 1;
+    };
+
+    SubObject sub = 4;
+    repeated SubObject sub_repeated = 5;
+
+    Internal internal = 6;
+
+    repeated Internal internal_repeated = 7;
+}
+
+message SubObject {
+    // Options specified at message level are applied for each field (in this case of type string)
+    option (preprocess.each).string = {
+        methods: [trim]
+    };
+
+    string str_val = 1;
 }
 
 // This message left as is to show that we can provide our own preprocessors

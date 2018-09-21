@@ -24,5 +24,44 @@ func (m *Demo) Preprocess() error {
 		m.PreprocessedRepeatedField[i] = strings.TrimSpace(s)
 	}
 
+	if m.Sub != nil {
+		m.Sub.Preprocess()
+	}
+
+	for _, v := range m.SubRepeated {
+		if v != nil {
+			v.Preprocess()
+		}
+	}
+
+	if m.Internal != nil {
+		m.Internal.Preprocess()
+	}
+
+	for _, v := range m.InternalRepeated {
+		if v != nil {
+			v.Preprocess()
+		}
+	}
+
+	return nil
+}
+
+func (m *Demo_Internal) Preprocess() error {
+
+	m.InternalString = strings.TrimSpace(m.InternalString)
+
+	return nil
+}
+
+func (m *SubObject) Preprocess() error {
+
+	m.StrVal = strings.TrimSpace(m.StrVal)
+
+	return nil
+}
+
+func (m *Custom) Preprocess() error {
+
 	return nil
 }
