@@ -1,7 +1,10 @@
 package plugin
 
 import (
+	"strings"
+
 	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
+	"github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
 	prep "github.com/infobloxopen/protoc-gen-preprocess/options"
 )
 
@@ -14,6 +17,7 @@ type preprocessor struct {
 	generator.PluginImports
 	packageName string
 	stringsPkg  generator.Single
+	file *generator.FileDescriptor
 }
 
 func NewPreprocessor() *preprocessor {
@@ -31,12 +35,10 @@ func (p *preprocessor) Init(g *generator.Generator) {
 
 func (p *preprocessor) Generate(file *generator.FileDescriptor) {
 	p.PluginImports = generator.NewPluginImports(p.Generator)
+	p.file = file
 	p.stringsPkg = p.NewImport("strings")
 	for _, message := range file.Messages() {
-		opts := getMessageOptions(message)
-		if opts != nil || containsFieldPreprocessOptions(message) {
-			p.generateProto3Message(message, opts)
-		}
+		p.generateProto3Message(message, getMessageOptions(message))
 	}
 }
 
@@ -46,13 +48,12 @@ func (p *preprocessor) generateProto3Message(message *generator.Descriptor, mess
 	p.In()
 	for _, field := range message.Field {
 		fieldOptions := getFieldOptions(field)
-		if fieldOptions == nil && !field.IsMessage() && messageOptions == nil {
-			continue
-		}
 		fieldName := p.GetOneOfFieldName(message, field)
 		variableName := "m." + fieldName
 		if field.IsString() {
 			p.generateStringPreprocessor(variableName, []prepOptions{messageOptions, fieldOptions}, field.IsRepeated())
+		} else if field.IsMessage() && p.getPackageMessage(field.GetTypeName()) != nil {
+				p.generatePreprocessCall("m." + fieldName, field.IsRepeated())
 		}
 	}
 	p.Out()
@@ -60,6 +61,15 @@ func (p *preprocessor) generateProto3Message(message *generator.Descriptor, mess
 	p.P(`return nil`)
 	p.P(`}`)
 	p.P()
+}
+
+func (p *preprocessor) getPackageMessage(t string) *descriptor.DescriptorProto {
+	pkg := "." + p.file.GetPackage() + "."
+	if strings.HasPrefix(t, pkg) {
+		return p.file.GetMessage(strings.TrimPrefix(t, pkg))
+	}
+
+	return nil
 }
 
 func (p *preprocessor) generateStringPreprocessor(variableName string, opts []prepOptions, repeated bool) {
@@ -72,6 +82,10 @@ func (p *preprocessor) generateStringPreprocessor(variableName string, opts []pr
 			}
 		}
 	}
+	if len(strMethods) == 0 {
+		return
+	}
+
 	if repeated {
 		p.P(`for i, s := range `, variableName, `{`)
 		p.In()
@@ -84,5 +98,21 @@ func (p *preprocessor) generateStringPreprocessor(variableName string, opts []pr
 		for _, method := range strMethods {
 			p.P(variableName, ` = `, p.stringsPkg.Use(), stringMethods[method], `(`, variableName, `)`)
 		}
+	}
+}
+
+func (p *preprocessor) generatePreprocessCall(variableName string, repeated bool) {
+	p.P()
+
+	if repeated {
+		p.P(`for _, v := range `, variableName, `{`)
+		p.P(`if v != nil {`)
+		p.P(`v.Preprocess()`)
+		p.P(`}`)
+		p.P(`}`)
+	} else {
+		p.P(`if `, variableName, ` != nil {`)
+		p.P(variableName, `.Preprocess()`)
+		p.P(`}`)
 	}
 }
