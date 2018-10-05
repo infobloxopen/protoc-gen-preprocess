@@ -3,8 +3,8 @@ package plugin
 import (
 	"strings"
 
-	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
 	"github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
+	"github.com/gogo/protobuf/protoc-gen-gogo/generator"
 	prep "github.com/infobloxopen/protoc-gen-preprocess/options"
 )
 
@@ -17,7 +17,7 @@ type preprocessor struct {
 	generator.PluginImports
 	packageName string
 	stringsPkg  generator.Single
-	file *generator.FileDescriptor
+	file        *generator.FileDescriptor
 }
 
 func NewPreprocessor() *preprocessor {
@@ -38,6 +38,9 @@ func (p *preprocessor) Generate(file *generator.FileDescriptor) {
 	p.file = file
 	p.stringsPkg = p.NewImport("strings")
 	for _, message := range file.Messages() {
+		if message.GetOptions().GetMapEntry() {
+			continue
+		}
 		p.generateProto3Message(message, getMessageOptions(message))
 	}
 }
@@ -47,13 +50,16 @@ func (p *preprocessor) generateProto3Message(message *generator.Descriptor, mess
 	p.P(`func (m *`, ccTypeName, `) Preprocess() error {`)
 	p.In()
 	for _, field := range message.Field {
+		if p.IsMap(field) {
+			continue
+		}
 		fieldOptions := getFieldOptions(field)
 		fieldName := p.GetOneOfFieldName(message, field)
 		variableName := "m." + fieldName
 		if field.IsString() {
 			p.generateStringPreprocessor(variableName, []prepOptions{messageOptions, fieldOptions}, field.IsRepeated())
 		} else if field.IsMessage() && p.getPackageMessage(field.GetTypeName()) != nil {
-				p.generatePreprocessCall("m." + fieldName, field.IsRepeated())
+			p.generatePreprocessCall("m."+fieldName, field.IsRepeated())
 		}
 	}
 	p.Out()
