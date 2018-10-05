@@ -29,6 +29,8 @@ message Demo {
     Internal internal = 6;
 
     repeated Internal internal_repeated = 7;
+
+    map <string, string> MyMap =8;
 }
 
 message SubObject {
