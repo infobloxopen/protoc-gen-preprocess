@@ -30,7 +30,7 @@ gentool:
 	@docker build -f $(GENPREP_DOCKERFILE) -t $(GENPREP_IMAGE):$(IMAGE_VERSION) .
 	@docker image prune -f --filter label=stage=server-intermediate
 
-gentool-example:
+gentool-example: gentool
 	docker run --rm -v $(CUR_DIR):$(SRCROOT) $(GENPREP_IMAGE):$(IMAGE_VERSION) \
 		--preprocess_out=$(SRCROOT) \
 		--go_out=plugins=grpc:$(SRCROOT) \
