@@ -1,39 +1,51 @@
+GOPATH ?= $(HOME)/go
+SRCPATH := $(patsubst %/,%,$(GOPATH))/src
 
-CUR_DIR 			:= $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
-REPO 				:= github.com/infobloxopen/protoc-gen-preprocess
-SRCROOT 			:= /go/src/$(REPO)
-IMAGE_REGISTRY 		?= infoblox
-DOCKERFILE_PATH 	:= $(CURDIR)/docker
-DOCKERPATH          := /go/src
-IMAGE_VERSION  		?= dev-preprocess
-GENPREP_IMAGE      	:= $(IMAGE_REGISTRY)/atlas-gentool
-GENPREP_DOCKERFILE 	:= $(DOCKERFILE_PATH)/Dockerfile
+PROJECT_ROOT := github.com/infobloxopen/protoc-gen-preprocess
 
-.PHONY: options install demo
+DOCKERFILE_PATH := $(CURDIR)/docker
+IMAGE_REGISTRY ?= infoblox
+IMAGE_VERSION  ?= dev-preprocess
 
-default: options install demo 
+# configuration for the protobuf gentool
+SRCROOT_ON_HOST      := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
+SRCROOT_IN_CONTAINER := /home/go/src/$(PROJECT_ROOT)
+DOCKERPATH           := /home/go/src
+DOCKER_RUNNER        := docker run --rm
+DOCKER_RUNNER        += -v $(SRCROOT_ON_HOST):$(SRCROOT_IN_CONTAINER)
+DOCKER_GENERATOR     := infoblox/atlas-gentool:$(IMAGE_VERSION)
+GENERATOR            := $(DOCKER_RUNNER) $(DOCKER_GENERATOR)
 
-install: options
+GENPREPROCESS_IMAGE      := $(IMAGE_REGISTRY)/atlas-gentool
+GENPREPROCESS_DOCKERFILE := $(DOCKERFILE_PATH)/Dockerfile
+
+default: vendor options install
+
+.PHONY: vendor
+vendor:
+	dep ensure -vendor-only
+
+.PHONY: vendor-update
+vendor-update:
+	dep ensure
+
+install:
 	go install
 
-options:
-	protoc -I /usr/local/include/ -I. --gogo_out="Mgoogle/protobuf/descriptor.proto=github.com/gogo/protobuf/protoc-gen-gogo/descriptor:." options/preprocess.proto  
-
-demo: options install
-	protoc -Iexample/proto -I$(GOPATH)/src -I/usr/local/include -I$(GOPATH)/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
-	--preprocess_out=./example/proto \
-	--go_out=plugins=grpc:./example/proto \
-	--grpc-gateway_out=./example/proto \
-	demo.proto
-
+.PHONY: gentool
 gentool:
-	@docker build -f $(GENPREP_DOCKERFILE) -t $(GENPREP_IMAGE):$(IMAGE_VERSION) .
-	@docker image prune -f --filter label=stage=server-intermediate
+	docker build -f $(GENPREPROCESS_DOCKERFILE) -t $(GENPREPROCESS_IMAGE):$(IMAGE_VERSION) .
+	docker image prune -f --filter label=stage=server-intermediate
 
-gentool-example: gentool
-	docker run --rm -v $(CUR_DIR):$(SRCROOT) $(GENPREP_IMAGE):$(IMAGE_VERSION) \
-		--preprocess_out=$(SRCROOT) \
-		--go_out=plugins=grpc:$(SRCROOT) \
-		--grpc-gateway_out=$(SRCROOT) \
-		example/proto/demo.proto
-		
+gentool-examples: gentool
+	$(GENERATOR) \
+		-I/go/src/github.com/infobloxopen/protoc-gen-preprocess \
+		--go_out="plugins=grpc:$(DOCKERPATH)" \
+		--grpc-gateway_out="logtostderr=true:$(DOCKERPATH)" \
+		--preprocess_out="$(DOCKERPATH)" \
+			example/proto/demo.proto
+
+gentool-options:
+	$(GENERATOR) \
+		--gogo_out="Mgoogle/protobuf/descriptor.proto=github.com/gogo/protobuf/protoc-gen-gogo/descriptor:$(DOCKERPATH)" \
+		$(PROJECT_ROOT)/options/preprocess.proto

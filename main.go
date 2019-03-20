@@ -6,8 +6,6 @@ import (
 )
 
 func main() {
-	req := command.Read()
-	p := plugin.NewPreprocessor()
-	resp := command.GeneratePlugin(req, p, ".pb.preprocess.go")
-	command.Write(resp)
+	response := command.GeneratePlugin(command.Read(), plugin.NewPreprocessor(), ".pb.preprocess.go")
+	command.Write(response)
 }

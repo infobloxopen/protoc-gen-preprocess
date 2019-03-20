@@ -9,10 +9,6 @@ import (
 	prep "github.com/infobloxopen/protoc-gen-preprocess/options"
 )
 
-func init() {
-	generator.RegisterPlugin(NewPreprocessor())
-}
-
 type preprocessor struct {
 	*generator.Generator
 	generator.PluginImports

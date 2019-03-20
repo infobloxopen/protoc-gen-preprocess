@@ -1,7 +1,11 @@
 syntax = "proto3";
+
 package proto;
+
 import "github.com/infobloxopen/protoc-gen-preprocess/options/preprocess.proto";
 import "google/api/annotations.proto";
+
+option go_package = "github.com/infobloxopen/protoc-gen-preprocess/example/proto;proto";
 
 message Demo {
     // Options specified at message level are applied for each field (in this case of type string)
@@ -30,7 +34,7 @@ message Demo {
 
     repeated Internal internal_repeated = 7;
 
-    map <string, string> MyMap =8;
+    map <string, string> MyMap = 8;
 }
 
 message SubObject {
