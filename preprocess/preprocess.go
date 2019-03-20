@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"sort"
 	"strings"
 
 	"github.com/gogo/protobuf/protoc-gen-gogo/descriptor"
@@ -80,11 +81,11 @@ func (p *preprocessor) getPackageMessage(t string) *descriptor.DescriptorProto {
 
 func (p *preprocessor) generateStringPreprocessor(variableName string, opts []prepOptions, repeated bool) {
 	p.P()
-	strMethods := make(map[string]prep.PreprocessString_Methods)
+	strMethods := make(map[string]int)
 	for _, v := range opts {
 		if str := v.GetString_(); str != nil {
 			for _, m := range str.Methods {
-				strMethods[m.String()] = m
+				strMethods[m.String()] = int(m)
 			}
 		}
 	}
@@ -92,16 +93,25 @@ func (p *preprocessor) generateStringPreprocessor(variableName string, opts []pr
 		return
 	}
 
+	strOrder := make([]int, len(strMethods))
+	i := 0
+	for _, v := range strMethods {
+		strOrder[i] = v
+		i++
+	}
+
+	sort.IntSlice(strOrder).Sort()
+
 	if repeated {
 		p.P(`for i, s := range `, variableName, `{`)
 		p.In()
-		for _, method := range strMethods {
+		for _, method := range strOrder {
 			p.P(variableName, `[i] = `, p.stringsPkg.Use(), stringMethods[method], `(s)`)
 		}
 		p.Out()
 		p.P(`}`)
 	} else {
-		for _, method := range strMethods {
+		for _, method := range strOrder {
 			p.P(variableName, ` = `, p.stringsPkg.Use(), stringMethods[method], `(`, variableName, `)`)
 		}
 	}

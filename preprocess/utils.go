@@ -7,10 +7,10 @@ import (
 	prep "github.com/infobloxopen/protoc-gen-preprocess/options"
 )
 
-var stringMethods = map[prep.PreprocessString_Methods]string{
-	prep.PreprocessString_trim:  ".TrimSpace",
-	prep.PreprocessString_upper: ".ToUpper",
-	prep.PreprocessString_lower: ".ToLower",
+var stringMethods = map[int]string{
+	int(prep.PreprocessString_trim):  ".TrimSpace",
+	int(prep.PreprocessString_upper): ".ToUpper",
+	int(prep.PreprocessString_lower): ".ToLower",
 }
 
 type prepOptions interface {
