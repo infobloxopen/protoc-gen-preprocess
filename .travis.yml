@@ -19,7 +19,7 @@ install:
 - dep ensure -vendor-only
 
 script:
-- make gentool-example
+- make gentool-examples
 
 # Trigger build/push of latest gentool
 deploy:
