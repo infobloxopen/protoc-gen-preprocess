@@ -29,6 +29,7 @@ message PreprocessString {
         trim = 1;
         upper = 2;
         lower = 3;
+        clear = 4;
     }
     repeated Methods methods = 1;
 }

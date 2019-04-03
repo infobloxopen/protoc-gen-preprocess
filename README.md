@@ -111,3 +111,4 @@ For now following list of fields supported:
   * **trim_space** - Will trim leading and following spaces
   * **upper** - Will convert to upper
   * **lower** - Will convert to lower
+  * **clear** - Will clear all previous options either inherited from message level or previous items in list.

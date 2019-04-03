@@ -35,6 +35,16 @@ message Demo {
     repeated Internal internal_repeated = 7;
 
     map <string, string> MyMap = 8;
+
+    repeated string preprocessRepeatedField2 = 9 [(preprocess.field).string = {methods: [lower, trim, none]}];
+
+    // must generate trim because none is an alias for no-op, no idea for what reason it was implemented
+    // but must keep it for backward compatibility.
+    repeated string nonepreprocessRepeated = 10 [(preprocess.field).string = {methods: [none]}];
+
+    // clear must clear previous settings in inheritance chain and put only lower preprocessing.
+    repeated string clearinheritance = 11 [(preprocess.field).string = {methods: [clear, lower]}];
+
 }
 
 message SubObject {
