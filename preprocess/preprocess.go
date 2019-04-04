@@ -78,10 +78,18 @@ func (p *preprocessor) getPackageMessage(t string) *descriptor.DescriptorProto {
 func (p *preprocessor) generateStringPreprocessor(variableName string, opts []prepOptions, repeated bool) {
 	p.P()
 	strMethods := make(map[string]int)
+
 	for _, v := range opts {
 		if str := v.GetString_(); str != nil {
 			for _, m := range str.Methods {
-				strMethods[m.String()] = int(m)
+				switch m {
+				case prep.PreprocessString_clear:
+					strMethods = make(map[string]int)
+				case prep.PreprocessString_none:
+					continue
+				default:
+					strMethods[m.String()] = int(m)
+				}
 			}
 		}
 	}
@@ -99,10 +107,10 @@ func (p *preprocessor) generateStringPreprocessor(variableName string, opts []pr
 	sort.IntSlice(strOrder).Sort()
 
 	if repeated {
-		p.P(`for i, s := range `, variableName, `{`)
+		p.P(`for i := range `, variableName, `{`)
 		p.In()
 		for _, method := range strOrder {
-			p.P(variableName, `[i] = `, p.stringsPkg.Use(), stringMethods[method], `(s)`)
+			p.P(variableName, `[i] = `, p.stringsPkg.Use(), stringMethods[method], `(`, variableName, `[i])`)
 		}
 		p.Out()
 		p.P(`}`)

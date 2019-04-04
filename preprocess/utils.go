@@ -8,9 +8,11 @@ import (
 )
 
 var stringMethods = map[int]string{
+	int(prep.PreprocessString_none):  "",
 	int(prep.PreprocessString_trim):  ".TrimSpace",
 	int(prep.PreprocessString_upper): ".ToUpper",
 	int(prep.PreprocessString_lower): ".ToLower",
+	int(prep.PreprocessString_clear): "",
 }
 
 type prepOptions interface {

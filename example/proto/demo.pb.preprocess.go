@@ -20,8 +20,8 @@ func (m *Demo) Preprocess() error {
 	m.PreprocessedField = strings.TrimSpace(m.PreprocessedField)
 	m.PreprocessedField = strings.ToLower(m.PreprocessedField)
 
-	for i, s := range m.PreprocessedRepeatedField {
-		m.PreprocessedRepeatedField[i] = strings.TrimSpace(s)
+	for i := range m.PreprocessedRepeatedField {
+		m.PreprocessedRepeatedField[i] = strings.TrimSpace(m.PreprocessedRepeatedField[i])
 	}
 
 	if m.Sub != nil {
@@ -42,6 +42,19 @@ func (m *Demo) Preprocess() error {
 		if v != nil {
 			v.Preprocess()
 		}
+	}
+
+	for i := range m.PreprocessRepeatedField2 {
+		m.PreprocessRepeatedField2[i] = strings.TrimSpace(m.PreprocessRepeatedField2[i])
+		m.PreprocessRepeatedField2[i] = strings.ToLower(m.PreprocessRepeatedField2[i])
+	}
+
+	for i := range m.NonepreprocessRepeated {
+		m.NonepreprocessRepeated[i] = strings.TrimSpace(m.NonepreprocessRepeated[i])
+	}
+
+	for i := range m.Clearinheritance {
+		m.Clearinheritance[i] = strings.ToLower(m.Clearinheritance[i])
 	}
 
 	return nil
