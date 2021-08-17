@@ -1,7 +1,7 @@
 syntax = "proto3";
 package preprocess;
 
-option go_package = "preprocess";
+option go_package = "github.com/infobloxopen/protoc-gen-preprocess/options;preprocess";
 
 import "google/protobuf/descriptor.proto";
 
