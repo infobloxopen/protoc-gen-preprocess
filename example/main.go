@@ -6,8 +6,8 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/grpc-ecosystem/go-grpc-middleware"
-	"github.com/grpc-ecosystem/grpc-gateway/runtime"
+	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/infobloxopen/atlas-app-toolkit/gateway"
 	demo "github.com/infobloxopen/protoc-gen-preprocess/example/proto"
 	grpc_preprocessor "github.com/infobloxopen/protoc-gen-preprocess/middleware"
@@ -56,7 +56,7 @@ func newDemoHandler(ctx context.Context, addr string, opts ...runtime.ServeMuxOp
 
 func runServer() {
 	mux := http.NewServeMux()
-	errHandler := runtime.WithProtoErrorHandler(gateway.ProtoMessageErrorHandler)
+	errHandler := runtime.WithErrorHandler(gateway.ProtoMessageErrorHandler)
 	opHandler := runtime.WithMetadata(gateway.MetadataAnnotator)
 
 	demoHandler, err := newDemoHandler(context.Background(), demoAddress, errHandler, opHandler)
