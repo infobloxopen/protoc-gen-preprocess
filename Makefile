@@ -23,11 +23,7 @@ default: vendor options install
 
 .PHONY: vendor
 vendor:
-	dep ensure -vendor-only
-
-.PHONY: vendor-update
-vendor-update:
-	dep ensure
+	go mod vendor
 
 install:
 	go install
