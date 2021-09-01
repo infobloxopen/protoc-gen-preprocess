@@ -43,5 +43,5 @@ gentool-examples: gentool
 
 gentool-options:
 	$(GENERATOR) \
-		--gogo_out="Mgoogle/protobuf/descriptor.proto=github.com/gogo/protobuf/protoc-gen-gogo/descriptor:$(DOCKERPATH)" \
+		--go_out="Mgoogle/protobuf/descriptor.proto:$(DOCKERPATH)" \
 		$(PROJECT_ROOT)/options/preprocess.proto
