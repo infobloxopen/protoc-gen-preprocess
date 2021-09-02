@@ -78,8 +78,6 @@ func generate(plugin *protogen.Plugin) *pluginpb.CodeGeneratorResponse {
 
 func generateProto3Message(g *protogen.GeneratedFile, message *protogen.Message) {
 	typeName := camelCase(string(message.Desc.Name()))
-	fmt.Fprintf(os.Stderr, "typeName: %s\n", typeName)
-
 	g.P(`func (m *`, typeName, `) Preprocess() error {`)
 
 	for _, field := range message.Fields {
@@ -89,7 +87,6 @@ func generateProto3Message(g *protogen.GeneratedFile, message *protogen.Message)
 		fieldOpts := getFieldOptions(field)
 		fieldName := string(field.GoName)
 		varName := "m." + fieldName
-		fmt.Fprintf(os.Stderr, "typeName: %s\n", field.Desc.Kind().String())
 		if field.Desc.Kind().String() == "string" {
 			generateStringPreprocessor(g, varName, []prepOptions{fieldOpts, getMessageOptions(message)}, field.Desc.IsList())
 		}
@@ -169,7 +166,7 @@ func getFieldOptions(field *protogen.Field) *preprocess.PreprocessFieldOptions {
 	}
 
 	v := proto.GetExtension(options, preprocess.E_Field)
-	if v != nil {
+	if v == nil {
 		return nil
 	}
 
@@ -177,6 +174,7 @@ func getFieldOptions(field *protogen.Field) *preprocess.PreprocessFieldOptions {
 	if !ok {
 		return nil
 	}
+
 	return opts
 }
 
