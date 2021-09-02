@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
 
 	preprocess "github.com/infobloxopen/protoc-gen-preprocess/options"
 	"google.golang.org/protobuf/compiler/protogen"
@@ -80,9 +81,67 @@ func generateProto3Message(g *protogen.GeneratedFile, message *protogen.Message)
 	fmt.Fprintf(os.Stderr, "typeName: %s\n", typeName)
 
 	g.P(`func (m *`, typeName, `) Preprocess() error {`)
+
+	for _, field := range message.Fields {
+		if field.Desc.IsMap() {
+			continue
+		}
+		fieldOpts := getFieldOptions(field)
+		fieldName := string(field.GoName)
+		varName := "m." + fieldName
+		fmt.Fprintf(os.Stderr, "typeName: %s\n", field.Desc.Kind().String())
+		if field.Desc.Kind().String() == "string" {
+			generateStringPreprocessor(g, varName, []prepOptions{fieldOpts, getMessageOptions(message)}, field.Desc.IsList())
+		}
+	}
+
 	g.P()
 	g.P("return nil")
 	g.P("}")
+}
+
+func generateStringPreprocessor(g *protogen.GeneratedFile, varName string, opts []prepOptions, repeated bool) {
+	g.P()
+	strMethods := make(map[string]int)
+
+	for _, v := range opts {
+		if str := v.GetString_(); str != nil {
+			for _, m := range str.Methods {
+				switch m {
+				case preprocess.PreprocessString_clear:
+					strMethods = make(map[string]int)
+				case preprocess.PreprocessString_none:
+					continue
+				default:
+					strMethods[m.String()] = int(m)
+				}
+			}
+		}
+	}
+	if len(strMethods) == 0 {
+		return
+	}
+
+	strOrder := make([]int, len(strMethods))
+	i := 0
+	for _, v := range strMethods {
+		strOrder[i] = v
+		i++
+	}
+
+	sort.IntSlice(strOrder).Sort()
+
+	if repeated {
+		g.P(`for i := range `, varName, `{`)
+		for _, method := range strOrder {
+			g.P(varName, `[i] = `, generateImport(stringMethods[method], "strings", g), `(`, varName, `[i])`)
+		}
+		g.P(`}`)
+	} else {
+		for _, method := range strOrder {
+			g.P(varName, ` = `, generateImport(stringMethods[method], "strings", g), `(`, varName, `)`)
+		}
+	}
 }
 
 func getMessageOptions(message *protogen.Message) *preprocess.PreprocessMessageOptions {
@@ -166,4 +225,34 @@ func isASCIILower(c byte) bool {
 
 func isASCIIDigit(c byte) bool {
 	return '0' <= c && c <= '9'
+}
+
+var stringMethods = map[int]string{
+	int(preprocess.PreprocessString_none):  "",
+	int(preprocess.PreprocessString_trim):  "TrimSpace",
+	int(preprocess.PreprocessString_upper): "ToUpper",
+	int(preprocess.PreprocessString_lower): "ToLower",
+	int(preprocess.PreprocessString_clear): "",
+}
+
+type prepOptions interface {
+	GetString_() *preprocess.PreprocessString
+}
+
+func containsFieldPreprocessOptions(message *protogen.Message) bool {
+	for _, field := range message.Fields {
+		fieldOptions := getFieldOptions(field)
+		if fieldOptions != nil {
+			return true
+		}
+	}
+
+	return false
+}
+
+func generateImport(name string, importPath string, g *protogen.GeneratedFile) string {
+	return g.QualifiedGoIdent(protogen.GoIdent{
+		GoName:       name,
+		GoImportPath: protogen.GoImportPath(importPath),
+	})
 }
