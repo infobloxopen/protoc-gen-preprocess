@@ -69,6 +69,11 @@ func generate(plugin *protogen.Plugin) *pluginpb.CodeGeneratorResponse {
 					continue
 				}
 				generateProto3Message(g, message)
+
+				// capture internal messages
+				for _, msg := range message.Messages {
+					processMessage(g, msg)
+				}
 			}
 		}
 	}
@@ -76,8 +81,32 @@ func generate(plugin *protogen.Plugin) *pluginpb.CodeGeneratorResponse {
 	return plugin.Response()
 }
 
+func processMessage(g *protogen.GeneratedFile, message *protogen.Message) {
+	var found bool
+	messageOptions := getMessageOptions(message)
+	if messageOptions != nil {
+		found = true
+	}
+
+	for _, field := range message.Fields {
+		options := getFieldOptions(field)
+		if options != nil {
+			found = true
+			break
+		}
+	}
+
+	if found {
+		generateProto3Message(g, message)
+	}
+
+	for _, internalMessage := range message.Messages {
+		processMessage(g, internalMessage)
+	}
+}
+
 func generateProto3Message(g *protogen.GeneratedFile, message *protogen.Message) {
-	typeName := camelCase(string(message.Desc.Name()))
+	typeName := message.GoIdent.GoName
 	g.P(`func (m *`, typeName, `) Preprocess() error {`)
 
 	for _, field := range message.Fields {
@@ -89,12 +118,30 @@ func generateProto3Message(g *protogen.GeneratedFile, message *protogen.Message)
 		varName := "m." + fieldName
 		if field.Desc.Kind().String() == "string" {
 			generateStringPreprocessor(g, varName, []prepOptions{fieldOpts, getMessageOptions(message)}, field.Desc.IsList())
+		} else if field.Desc.Message() != nil { // TODO: check for same package?
+			generatePreprocessCall(g, varName, field.Desc.IsList())
 		}
 	}
 
 	g.P()
 	g.P("return nil")
 	g.P("}")
+}
+
+func generatePreprocessCall(g *protogen.GeneratedFile, varName string, repeated bool) {
+	g.P()
+
+	if repeated {
+		g.P(`for _, v := range `, varName, `{`)
+		g.P(`if v != nil {`)
+		g.P(`v.Preprocess()`)
+		g.P(`}`)
+		g.P(`}`)
+	} else {
+		g.P(`if `, varName, ` != nil {`)
+		g.P(varName, `.Preprocess()`)
+		g.P(`}`)
+	}
 }
 
 func generateStringPreprocessor(g *protogen.GeneratedFile, varName string, opts []prepOptions, repeated bool) {
