@@ -3,7 +3,6 @@ module github.com/infobloxopen/protoc-gen-preprocess
 go 1.17
 
 require (
-	github.com/gogo/protobuf v1.3.2
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.5.0
 	github.com/infobloxopen/atlas-app-toolkit v1.0.0
