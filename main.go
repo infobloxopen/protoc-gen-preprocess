@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"sort"
+	"strings"
 
 	preprocess "github.com/infobloxopen/protoc-gen-preprocess/options"
 	"google.golang.org/protobuf/compiler/protogen"
@@ -68,11 +69,11 @@ func generate(plugin *protogen.Plugin) *pluginpb.CodeGeneratorResponse {
 				if message.Desc.IsMapEntry() {
 					continue
 				}
-				generateProto3Message(g, message)
+				generateProto3Message(g, message, string(protoFile.GoPackageName))
 
 				// capture internal messages
 				for _, msg := range message.Messages {
-					processMessage(g, msg)
+					processMessage(g, msg, string(protoFile.GoPackageName))
 				}
 			}
 		}
@@ -81,7 +82,7 @@ func generate(plugin *protogen.Plugin) *pluginpb.CodeGeneratorResponse {
 	return plugin.Response()
 }
 
-func processMessage(g *protogen.GeneratedFile, message *protogen.Message) {
+func processMessage(g *protogen.GeneratedFile, message *protogen.Message, packageName string) {
 	var found bool
 	messageOptions := getMessageOptions(message)
 	if messageOptions != nil {
@@ -97,15 +98,15 @@ func processMessage(g *protogen.GeneratedFile, message *protogen.Message) {
 	}
 
 	if found {
-		generateProto3Message(g, message)
+		generateProto3Message(g, message, packageName)
 	}
 
 	for _, internalMessage := range message.Messages {
-		processMessage(g, internalMessage)
+		processMessage(g, internalMessage, packageName)
 	}
 }
 
-func generateProto3Message(g *protogen.GeneratedFile, message *protogen.Message) {
+func generateProto3Message(g *protogen.GeneratedFile, message *protogen.Message, packageName string) {
 	typeName := message.GoIdent.GoName
 	g.P(`func (m *`, typeName, `) Preprocess() error {`)
 
@@ -118,7 +119,7 @@ func generateProto3Message(g *protogen.GeneratedFile, message *protogen.Message)
 		varName := "m." + fieldName
 		if field.Desc.Kind().String() == "string" {
 			generateStringPreprocessor(g, varName, []prepOptions{getMessageOptions(message), fieldOpts}, field.Desc.IsList())
-		} else if field.Desc.Message() != nil { // TODO: check for same package?
+		} else if field.Desc.Message() != nil && strings.HasSuffix(string(field.GoIdent.GoImportPath), packageName) {
 			generatePreprocessCall(g, varName, field.Desc.IsList())
 		}
 	}
