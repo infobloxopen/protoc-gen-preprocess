@@ -117,7 +117,7 @@ func generateProto3Message(g *protogen.GeneratedFile, message *protogen.Message)
 		fieldName := string(field.GoName)
 		varName := "m." + fieldName
 		if field.Desc.Kind().String() == "string" {
-			generateStringPreprocessor(g, varName, []prepOptions{fieldOpts, getMessageOptions(message)}, field.Desc.IsList())
+			generateStringPreprocessor(g, varName, []prepOptions{getMessageOptions(message), fieldOpts}, field.Desc.IsList())
 		} else if field.Desc.Message() != nil { // TODO: check for same package?
 			generatePreprocessCall(g, varName, field.Desc.IsList())
 		}
