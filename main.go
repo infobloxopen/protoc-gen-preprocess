@@ -119,7 +119,7 @@ func generateProto3Message(g *protogen.GeneratedFile, message *protogen.Message,
 		varName := "m." + fieldName
 		if field.Desc.Kind().String() == "string" {
 			generateStringPreprocessor(g, varName, []prepOptions{getMessageOptions(message), fieldOpts}, field.Desc.IsList())
-		} else if field.Desc.Message() != nil && strings.HasSuffix(string(field.Message.GoIdent.GoImportPath), packageName) {
+		} else if field.Desc.Message() != nil && samePackage(packageName, string(field.Message.GoIdent.GoImportPath)) {
 			generatePreprocessCall(g, varName, field.Desc.IsList())
 		}
 	}
@@ -254,4 +254,10 @@ func generateImport(name string, importPath string, g *protogen.GeneratedFile) s
 		GoName:       name,
 		GoImportPath: protogen.GoImportPath(importPath),
 	})
+}
+
+func samePackage(packageName string, importPath string) bool {
+	sp := strings.Split(importPath, "/")
+	last := sp[len(sp)-1]
+	return last == packageName
 }
