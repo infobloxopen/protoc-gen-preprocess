@@ -4,6 +4,7 @@ package proto;
 
 import "github.com/infobloxopen/protoc-gen-preprocess/options/preprocess.proto";
 import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/infobloxopen/protoc-gen-preprocess/example/proto;proto";
 
@@ -45,6 +46,8 @@ message Demo {
     // clear must clear previous settings in inheritance chain and put only lower preprocessing.
     repeated string clearinheritance = 11 [(preprocess.field).string = {methods: [clear, lower]}];
 
+    // should not be preprocessed
+    google.protobuf.Timestamp time = 12;
 }
 
 message SubObject {
