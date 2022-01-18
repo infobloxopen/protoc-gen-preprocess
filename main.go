@@ -45,8 +45,8 @@ func generate(plugin *protogen.Plugin) *pluginpb.CodeGeneratorResponse {
 	for _, protoFile := range plugin.Files {
 		var found bool
 		for _, message := range protoFile.Messages {
-			messageOptions := getMessageOptions(message)
-			if messageOptions != nil {
+			messageOptions, eachOptions := getMessageOptions(message)
+			if messageOptions != nil || eachOptions != nil {
 				found = true
 				break
 			}
@@ -84,8 +84,8 @@ func generate(plugin *protogen.Plugin) *pluginpb.CodeGeneratorResponse {
 
 func processMessage(g *protogen.GeneratedFile, message *protogen.Message, packageName string) {
 	var found bool
-	messageOptions := getMessageOptions(message)
-	if messageOptions != nil {
+	messageOptions, each := getMessageOptions(message)
+	if messageOptions != nil || each != nil {
 		found = true
 	}
 
@@ -107,8 +107,14 @@ func processMessage(g *protogen.GeneratedFile, message *protogen.Message, packag
 }
 
 func generateProto3Message(g *protogen.GeneratedFile, message *protogen.Message, packageName string) {
+	messageOptions, eachOptions := getMessageOptions(message)
 	typeName := message.GoIdent.GoName
 	g.P(`func (m *`, typeName, `) Preprocess() error {`)
+	if messageOptions != nil && messageOptions.Prefunction != "" {
+		g.P("if err := m." + messageOptions.Prefunction + "(); err != nil {")
+		g.P("  return err")
+		g.P("}")
+	}
 
 	for _, field := range message.Fields {
 		if field.Desc.IsMap() {
@@ -118,14 +124,20 @@ func generateProto3Message(g *protogen.GeneratedFile, message *protogen.Message,
 		fieldName := string(field.GoName)
 		varName := "m." + fieldName
 		if field.Desc.Kind().String() == "string" {
-			generateStringPreprocessor(g, varName, []prepOptions{getMessageOptions(message), fieldOpts}, field.Desc.IsList())
+			generateStringPreprocessor(g, varName, []prepOptions{eachOptions, fieldOpts}, field.Desc.IsList())
 		} else if field.Desc.Message() != nil && samePackage(packageName, string(field.Message.GoIdent.GoImportPath)) {
 			generatePreprocessCall(g, varName, field.Desc.IsList())
 		}
 	}
 
+	if messageOptions != nil && messageOptions.Postfunction != "" {
+		g.P("if err := m.", messageOptions.Postfunction, "(); err != nil {")
+		g.P("  return err")
+		g.P("}")
+	}
+
 	g.P()
-	g.P("return nil")
+	g.P("  return nil")
 	g.P("}")
 }
 
@@ -134,13 +146,17 @@ func generatePreprocessCall(g *protogen.GeneratedFile, varName string, repeated 
 
 	if repeated {
 		g.P(`for _, v := range `, varName, `{`)
-		g.P(`if v != nil {`)
-		g.P(`v.Preprocess()`)
-		g.P(`}`)
+		g.P(`  if v != nil {`)
+		g.P(`    if err := v.Preprocess(); err != nil {`)
+		g.P(`      return err`)
+		g.P(`    }`)
+		g.P(`  }`)
 		g.P(`}`)
 	} else {
 		g.P(`if `, varName, ` != nil {`)
-		g.P(varName, `.Preprocess()`)
+		g.P(`  if err := `, varName, `.Preprocess(); err != nil {`)
+		g.P(`    return err`)
+		g.P(`  }`)
 		g.P(`}`)
 	}
 }
@@ -189,22 +205,19 @@ func generateStringPreprocessor(g *protogen.GeneratedFile, varName string, opts 
 	}
 }
 
-func getMessageOptions(message *protogen.Message) *preprocess.PreprocessMessageOptions {
+func getMessageOptions(message *protogen.Message) (messgageOptions *preprocess.PreprocessMessageOptions, eachOptions *preprocess.PreprocessFieldOptions) {
 	options := message.Desc.Options()
 	if options == nil {
-		return nil
-	}
-	v := proto.GetExtension(options, preprocess.E_Each)
-	if v == nil {
-		return nil
+		return nil, nil
 	}
 
-	opts, ok := v.(*preprocess.PreprocessMessageOptions)
-	if !ok {
-		return nil
-	}
+	v := proto.GetExtension(options, preprocess.E_Message)
+	messgageOptions, _ = v.(*preprocess.PreprocessMessageOptions)
 
-	return opts
+	v = proto.GetExtension(options, preprocess.E_Each)
+	eachOptions, _ = v.(*preprocess.PreprocessFieldOptions)
+
+	return
 }
 
 func getFieldOptions(field *protogen.Field) *preprocess.PreprocessFieldOptions {
@@ -214,14 +227,7 @@ func getFieldOptions(field *protogen.Field) *preprocess.PreprocessFieldOptions {
 	}
 
 	v := proto.GetExtension(options, preprocess.E_Field)
-	if v == nil {
-		return nil
-	}
-
-	opts, ok := v.(*preprocess.PreprocessFieldOptions)
-	if !ok {
-		return nil
-	}
+	opts, _ := v.(*preprocess.PreprocessFieldOptions)
 
 	return opts
 }
