@@ -13,6 +13,12 @@ message Demo {
     option (preprocess.each).string = {
         methods: [trim]
     };
+
+    option (preprocess.message) = {
+        prefunction: "testPreFunction"
+        postfunction: "testPostFunction"
+    };
+
     // Also it is possible to specify additional method on field level
     string preprocessedField = 1 [(preprocess.field).string.methods = lower];
     // Preprocessor automatically checks if field is repeated and generates methods accordingly

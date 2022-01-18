@@ -33,15 +33,29 @@ gentool:
 	docker build -f $(GENPREPROCESS_DOCKERFILE) -t $(GENPREPROCESS_IMAGE):$(IMAGE_VERSION) .
 	docker image prune -f --filter label=stage=server-intermediate
 
-gentool-examples: gentool
-	$(GENERATOR) \
-		-I/go/src/github.com/infobloxopen/protoc-gen-preprocess \
-		--go_out="plugins=grpc:$(DOCKERPATH)" \
-		--grpc-gateway_out="logtostderr=true:$(DOCKERPATH)" \
-		--preprocess_out="$(DOCKERPATH)" \
-			example/proto/demo.proto
-
 gentool-options:
 	$(GENERATOR) \
 		--go_out="Mgoogle/protobuf/descriptor.proto:$(DOCKERPATH)" \
 		$(PROJECT_ROOT)/options/preprocess.proto
+
+# examples related build targets
+
+gentool-examples: gentool-examples-proto gentool-examples-build
+
+gentool-examples-proto: gentool
+	$(GENERATOR) \
+		-I/go/src/github.com/infobloxopen/protoc-gen-preprocess \
+		-I$(SRCROOT_IN_CONTAINER) \
+		--go_out="paths=source_relative:." \
+		--go-grpc_out="$(DOCKERPATH)" \
+		--grpc-gateway_out="logtostderr=true:$(DOCKERPATH)" \
+		--preprocess_out="$(DOCKERPATH)" \
+			example/proto/demo.proto
+
+gentool-examples-build:
+	mkdir -p .build/bin/
+	docker run --rm \
+		-v $(SRCROOT_ON_HOST):/go/src/$(PROJECT_ROOT) \
+		golang:1.17.6-alpine \
+			sh -c "cd /go/src/$(PROJECT_ROOT) && go build -o .build/bin/ $(PROJECT_ROOT)/example/"
+
