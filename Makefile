@@ -9,8 +9,8 @@ IMAGE_VERSION  ?= dev-preprocess
 
 # configuration for the protobuf gentool
 SRCROOT_ON_HOST      := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
-SRCROOT_IN_CONTAINER := /home/go/src/$(PROJECT_ROOT)
-DOCKERPATH           := /home/go/src
+SRCROOT_IN_CONTAINER := /go/src/$(PROJECT_ROOT)
+DOCKERPATH           := /go/src
 DOCKER_RUNNER        := docker run --rm
 DOCKER_RUNNER        += -v $(SRCROOT_ON_HOST):$(SRCROOT_IN_CONTAINER)
 DOCKER_GENERATOR     := infoblox/atlas-gentool:$(IMAGE_VERSION)
@@ -29,7 +29,7 @@ install:
 	go install
 
 .PHONY: gentool
-gentool:
+gentool: vendor
 	docker build -f $(GENPREPROCESS_DOCKERFILE) -t $(GENPREPROCESS_IMAGE):$(IMAGE_VERSION) .
 	docker image prune -f --filter label=stage=server-intermediate
 
@@ -40,7 +40,7 @@ gentool-options:
 
 # examples related build targets
 
-gentool-examples: gentool-examples-proto gentool-examples-build
+gentool-examples: vendor gentool-examples-proto gentool-examples-build
 
 gentool-examples-proto: gentool
 	$(GENERATOR) \
@@ -50,9 +50,9 @@ gentool-examples-proto: gentool
 		--go-grpc_out="$(DOCKERPATH)" \
 		--grpc-gateway_out="logtostderr=true:$(DOCKERPATH)" \
 		--preprocess_out="$(DOCKERPATH)" \
-			example/proto/demo.proto
+			github.com/infobloxopen/protoc-gen-preprocess/example/proto/demo.proto
 
-gentool-examples-build:
+gentool-examples-build: vendor
 	mkdir -p .build/bin/
 	docker run --rm \
 		-v $(SRCROOT_ON_HOST):/go/src/$(PROJECT_ROOT) \

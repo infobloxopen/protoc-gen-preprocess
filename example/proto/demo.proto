@@ -14,10 +14,11 @@ message Demo {
         methods: [trim]
     };
 
-    option (preprocess.message) = {
-        prefunction: "testPreFunction"
-        postfunction: "testPostFunction"
+    option (preprocess.function) = {
+        pre: "testPreFunction"
+        post: "testPostFunction"
     };
+    
 
     // Also it is possible to specify additional method on field level
     string preprocessedField = 1 [(preprocess.field).string.methods = lower];

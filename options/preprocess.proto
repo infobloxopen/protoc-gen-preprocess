@@ -7,13 +7,40 @@ import "google/protobuf/descriptor.proto";
 
 // Message level options
 extend google.protobuf.MessageOptions{
-    PreprocessMessageOptions message = 11110;
+    // custom_functions allow the user to specify message receiver functions which will be invoked during preprocessing
+    // example:
+    //
+    // example.proto:
+    // message MyMessage {
+    //   option (preprocess.function) = {
+    //     pre: "beforeFieldProcessing"
+    //     post: "afterFieldProcessing"
+    //   };
+    //   string test = 1;
+    // }
+    //
+    // example.pb.preprocess_custom.go:
+    // package proto
+    //
+    // // beforeFieldProcessing is a custom function added to MyMessage
+    // //   and invoked by generated PreProcess before field processing 
+    // func (m *MyMessage) beforeFieldProcessing() error { return nil }
+    //
+    // // afterFieldProcessing is a custom function added to MyMessage
+    // //   and invoked by generated PreProcess after field processing 
+    // func (m *MyMessage) afterFieldProcessing() error { return nil }
+    //
+    PreprocessFunction function = 11110;
+
+    // each allows field options to be applied to all strings within a message
     PreprocessFieldOptions each = 11111;
 }
 
-message PreprocessMessageOptions {
-    string prefunction = 1;
-    string postfunction = 2;
+message PreprocessFunction {
+    // pre specifies a function name which will be invoked before field processing
+    string pre = 1;
+    // post specifies a function name which will be invoked after field processing
+    string post = 2;
 }
 
 // Field level options
@@ -21,6 +48,8 @@ extend google.protobuf.FieldOptions {
     PreprocessFieldOptions field = 11112;
 }
 
+// PreprocessFieldOptions is available on individual fields and at the message
+// level using the 'each' option
 message PreprocessFieldOptions {
     PreprocessString string = 1;
 }

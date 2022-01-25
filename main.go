@@ -107,11 +107,11 @@ func processMessage(g *protogen.GeneratedFile, message *protogen.Message, packag
 }
 
 func generateProto3Message(g *protogen.GeneratedFile, message *protogen.Message, packageName string) {
-	messageOptions, eachOptions := getMessageOptions(message)
+	functions, eachOptions := getMessageOptions(message)
 	typeName := message.GoIdent.GoName
 	g.P(`func (m *`, typeName, `) Preprocess() error {`)
-	if messageOptions != nil && messageOptions.Prefunction != "" {
-		g.P("if err := m." + messageOptions.Prefunction + "(); err != nil {")
+	if functions != nil && functions.Pre != "" {
+		g.P("if err := m." + functions.Pre + "(); err != nil {")
 		g.P("  return err")
 		g.P("}")
 	}
@@ -130,8 +130,8 @@ func generateProto3Message(g *protogen.GeneratedFile, message *protogen.Message,
 		}
 	}
 
-	if messageOptions != nil && messageOptions.Postfunction != "" {
-		g.P("if err := m.", messageOptions.Postfunction, "(); err != nil {")
+	if functions != nil && functions.Post != "" {
+		g.P("if err := m.", functions.Post, "(); err != nil {")
 		g.P("  return err")
 		g.P("}")
 	}
@@ -205,14 +205,14 @@ func generateStringPreprocessor(g *protogen.GeneratedFile, varName string, opts 
 	}
 }
 
-func getMessageOptions(message *protogen.Message) (messgageOptions *preprocess.PreprocessMessageOptions, eachOptions *preprocess.PreprocessFieldOptions) {
+func getMessageOptions(message *protogen.Message) (functions *preprocess.PreprocessFunction, eachOptions *preprocess.PreprocessFieldOptions) {
 	options := message.Desc.Options()
 	if options == nil {
 		return nil, nil
 	}
 
-	v := proto.GetExtension(options, preprocess.E_Message)
-	messgageOptions, _ = v.(*preprocess.PreprocessMessageOptions)
+	v := proto.GetExtension(options, preprocess.E_Function)
+	functions, _ = v.(*preprocess.PreprocessFunction)
 
 	v = proto.GetExtension(options, preprocess.E_Each)
 	eachOptions, _ = v.(*preprocess.PreprocessFieldOptions)
