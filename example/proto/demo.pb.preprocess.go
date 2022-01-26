@@ -5,6 +5,9 @@ import (
 )
 
 func (m *Demo) Preprocess() error {
+	if err := m.testPreFunction(); err != nil {
+		return err
+	}
 
 	m.PreprocessedField = strings.TrimSpace(m.PreprocessedField)
 	m.PreprocessedField = strings.ToLower(m.PreprocessedField)
@@ -14,22 +17,30 @@ func (m *Demo) Preprocess() error {
 	}
 
 	if m.Sub != nil {
-		m.Sub.Preprocess()
+		if err := m.Sub.Preprocess(); err != nil {
+			return err
+		}
 	}
 
 	for _, v := range m.SubRepeated {
 		if v != nil {
-			v.Preprocess()
+			if err := v.Preprocess(); err != nil {
+				return err
+			}
 		}
 	}
 
 	if m.Internal != nil {
-		m.Internal.Preprocess()
+		if err := m.Internal.Preprocess(); err != nil {
+			return err
+		}
 	}
 
 	for _, v := range m.InternalRepeated {
 		if v != nil {
-			v.Preprocess()
+			if err := v.Preprocess(); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -44,6 +55,9 @@ func (m *Demo) Preprocess() error {
 
 	for i := range m.Clearinheritance {
 		m.Clearinheritance[i] = strings.ToLower(m.Clearinheritance[i])
+	}
+	if err := m.testPostFunction(); err != nil {
+		return err
 	}
 
 	return nil

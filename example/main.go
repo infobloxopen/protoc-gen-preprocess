@@ -19,7 +19,10 @@ const (
 	serverAddress = "localhost:8080"
 )
 
-type demoServer struct{}
+type demoServer struct {
+	// embedding UnimplementedDemoServiceServer for forward compatibility
+	demo.UnimplementedDemoServiceServer
+}
 
 //Echo implementation of demo service
 func (s demoServer) Echo(ctx context.Context, d *demo.Demo) (*demo.Demo, error) {
